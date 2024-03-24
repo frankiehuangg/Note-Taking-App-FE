@@ -53,19 +53,19 @@ const IndexPage = () => {
                         icon={<Icon as={FcOpenedFolder} w={10} h={10}/>}
                         title={'Simple Organization'}
                         text={
-                            'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore...'
+                            'Experience effortless simplicity and unparalleled ease with our user-friendly solution!'
                         }/>
                     <Feature
                         icon={<Icon as={FcFilledFilter} w={10} h={10}/>}
-                        title={'Note Filtering'}
+                        title={'Note Typing'}
                         text={
-                            'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore...'
+                            'Empower your memory with customizable tags for every note, making recollection a breeze!'
                         }/>
                     <Feature
                         icon={<Icon as={FcLock} w={10} h={10}/>}
                         title={'Safety Guaranteed'}
                         text={
-                            'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore...'
+                            'Rest assured with our advanced JWT protection, guaranteeing the utmost privacy for your cherished secrets!'
                         }/>
                 </SimpleGrid>
             </Box>
