@@ -2,7 +2,7 @@
 
 import {Box, Button, Container, Heading, Icon, SimpleGrid, Stack, Text} from "@chakra-ui/react";
 import Feature from "../components/feature.tsx";
-import {FcFilledFilter, FcLock, FcStackOfPhotos} from "react-icons/fc";
+import {FcFilledFilter, FcLock, FcOpenedFolder} from "react-icons/fc";
 
 const IndexPage = () => {
     return (
@@ -33,6 +33,8 @@ const IndexPage = () => {
                         alignSelf={'center'}
                         position={'relative'}>
                         <Button
+                            as={'a'}
+                            href={'/note'}
                             colorScheme={'blue'}
                             bg={'blue.400'}
                             rounded={'full'}
@@ -48,8 +50,8 @@ const IndexPage = () => {
             <Box p={4}>
                 <SimpleGrid columns={{base: 1, md: 3}} spacing={10}>
                     <Feature
-                        icon={<Icon as={FcStackOfPhotos} w={10} h={10}/>}
-                        title={'Image Support'}
+                        icon={<Icon as={FcOpenedFolder} w={10} h={10}/>}
+                        title={'Simple Organization'}
                         text={
                             'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore...'
                         }/>
