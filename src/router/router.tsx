@@ -1,10 +1,11 @@
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 
 import Sidebar from "../components/sidebar.tsx";
-import IndexPage from "../pages";
+import IndexPage from "../pages/index.tsx";
 import LoginPage from "../pages/login.tsx";
 import RegisterPage from "../pages/register.tsx";
-import NotePage from "../pages/post.tsx";
+import NotePage from "../pages/note.tsx";
+import LogoutPage from "../pages/logout.tsx";
 
 const routes = createBrowserRouter([
     {
@@ -16,7 +17,7 @@ const routes = createBrowserRouter([
             },
             {
                 path: '/note',
-                element: <NotePage />
+                element: <NotePage/>
             },
         ]
     },
@@ -27,6 +28,10 @@ const routes = createBrowserRouter([
     {
         path: '/login',
         element: <LoginPage/>
+    },
+    {
+        path: '/logout',
+        element: <LogoutPage/>
     }
 ]);
 
