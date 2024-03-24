@@ -70,7 +70,7 @@ const NotePage = () => {
             }, {withCredentials: true})
 
             if (response.status === 200) {
-                retrieveNotes()
+                await retrieveNotes()
             }
         } catch (err) {
             console.log('Error: ', err)
@@ -110,7 +110,7 @@ const NotePage = () => {
         }
 
         retrieveNotes()
-    }, [])
+    })
 
     return (
         <Tabs
@@ -235,25 +235,6 @@ const NotePreview = ({modifiedAt, noteID, noteTitle, noteContent, noteType}: Not
 
     const baseURL = constants.BACKEND_URL
 
-    const updateNote = async () => {
-        try {
-            const response = await axios.patch(`${baseURL}/api/v1/note`, {
-                id: noteID,
-                title: title,
-                content: content,
-                type: type
-            }, {withCredentials: true})
-
-            if (response.status === 200) {
-                console.log('updated')
-            }
-
-            return response.data
-        } catch (err) {
-            console.log('Error: ', err)
-            throw err
-        }
-    }
 
     const deleteNote = async () => {
         try {
@@ -271,9 +252,30 @@ const NotePreview = ({modifiedAt, noteID, noteTitle, noteContent, noteType}: Not
     useEffect(() => {
         if (isChanged) {
             setIsChanged(false)
+
+            const updateNote = async () => {
+                try {
+                    const response = await axios.patch(`${baseURL}/api/v1/note`, {
+                        id: noteID,
+                        title: title,
+                        content: content,
+                        type: type
+                    }, {withCredentials: true})
+
+                    if (response.status === 200) {
+                        console.log('updated')
+                    }
+
+                    return response.data
+                } catch (err) {
+                    console.log('Error: ', err)
+                    throw err
+                }
+            }
+
             updateNote()
         }
-    }, [isChanged, updateNote])
+    }, [baseURL, content, isChanged, noteID, title, type])
 
     return (
         <TabPanel height={'100%'}>
