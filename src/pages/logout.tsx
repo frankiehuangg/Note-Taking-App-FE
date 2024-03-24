@@ -15,11 +15,8 @@ const LogoutPage = () => {
 
             try {
                 const response = await axios.post(`${baseURL}/api/v1/logout`, {}, {withCredentials: true})
-                console.log('ok')
-                console.log(response)
 
                 if (response.status === 200) {
-                    console.log('ok')
                     document.cookie = 'SessionID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                     navigate('/')
                 }
