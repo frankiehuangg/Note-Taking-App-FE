@@ -26,10 +26,15 @@ interface LinkItemProps {
     icon: IconType,
 }
 
-const LinkItems: Array<LinkItemProps> = [
+const GuestLinkItems: Array<LinkItemProps> = [
     {name: 'Home', href: '/', icon: FiHome},
     {name: 'Note', href: '/note', icon: IoDocumentTextOutline},
-    {name: 'Login', href: '/login', icon: FiLogIn},
+    {name: 'Login', href: '/login', icon: FiLogIn}
+]
+
+const UserLinkItems : Array<LinkItemProps> = [
+    {name: 'Home', href: '/', icon: FiHome},
+    {name: 'Note', href: '/note', icon: IoDocumentTextOutline},
     {name: 'Logout', href: '/logout', icon: FiLogOut}
 ]
 
@@ -62,6 +67,8 @@ interface SidebarProps extends BoxProps {
 }
 
 const SidebarContent = ({onClose, ...rest}: SidebarProps) => {
+    const isLoggedIn = document.cookie.includes('SessionID')
+
     return (
         <Box
             bg={useColorModeValue('white', 'gray.900')}
@@ -77,11 +84,18 @@ const SidebarContent = ({onClose, ...rest}: SidebarProps) => {
                 </Text>
                 <CloseButton display={{base: 'flex', md: 'none'}} onClick={onClose}/>
             </Flex>
-            {LinkItems.map((link) => (
-                <NavItem key={link.name} href={link.href} icon={link.icon}>
-                    {link.name}
-                </NavItem>
-            ))}
+            {isLoggedIn ? (
+                UserLinkItems.map((link) => (
+                    <NavItem key={link.name} href={link.href} icon={link.icon}>
+                        {link.name}
+                    </NavItem>
+                ))) : (
+                GuestLinkItems.map((link) => (
+                    <NavItem key={link.name} href={link.href} icon={link.icon}>
+                        {link.name}
+                    </NavItem>
+                ))
+            )}
         </Box>
     )
 }
