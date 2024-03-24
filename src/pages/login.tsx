@@ -3,19 +3,68 @@
 import {
     Box,
     Button,
-    Checkbox,
     Flex,
     FormControl,
+    FormErrorMessage,
     FormLabel,
     Heading,
     Input,
+    InputGroup,
+    InputRightElement,
     Link,
     Stack,
     Text,
     useColorModeValue
 } from "@chakra-ui/react";
+import React, {useState} from "react";
+import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
+import {useNavigate} from "react-router-dom";
+import validator from "validator";
+import constants from "../constants/constants.ts";
+import axios from "axios";
 
 const LoginPage = () => {
+    const [showPassword, setShowPassword] = useState(false)
+    const [hasTried, setHasTried] = useState(false)
+
+    const [email, setEmail] = React.useState('')
+    const [password, setPassword] = React.useState('')
+
+    const navigate = useNavigate()
+    const logIn = async () => {
+        if (!hasTried) setHasTried(true)
+
+        if (email === '' || password === '') {
+            return
+        }
+
+        if (!validator.isEmail(email)) {
+            return
+        }
+        if (!validator.isStrongPassword(password)) {
+            return
+        }
+
+        const baseURL = constants.BACKEND_URL
+
+        try {
+            const response = await axios.post(`${baseURL}/api/v1/login`, {
+                'email': email,
+                'password': password
+            }, {withCredentials: true})
+
+
+            if (response.status === 200) {
+                navigate('/')
+            }
+
+            return response.data
+        } catch (err) {
+            console.log('Error: ', err)
+            throw err
+        }
+    }
+
     return (
         <Flex
             minH={'100vh'}
@@ -35,23 +84,38 @@ const LoginPage = () => {
                     boxShadow={'lg'}
                     p={8}>
                     <Stack spacing={4}>
-                        <FormControl id={'email'} isRequired>
+                        <FormControl id={'email'} isInvalid={email === '' && hasTried}>
                             <FormLabel>Email address</FormLabel>
-                            <Input type={'email'}/>
+                            <Input
+                                value={email}
+                                type={'email'}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}/>
+                            {email === '' ? (
+                                <FormErrorMessage>Email is required</FormErrorMessage>
+                            ) : (<> </>)}
                         </FormControl>
-                        <FormControl id={'password'} isRequired>
+                        <FormControl id={'password'} isInvalid={password === '' && hasTried}>
                             <FormLabel>Password</FormLabel>
-                            <Input type={'password'}/>
+                            <InputGroup>
+                                <Input
+                                    value={password}
+                                    type={showPassword ? 'text' : 'password'}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}/>
+                                <InputRightElement h={'full'}>
+                                    <Button
+                                        variant={'ghost'}
+                                        onClick={() => setShowPassword((showPassword) => !showPassword)}>
+                                        {showPassword ? <ViewIcon/> : <ViewOffIcon/>}
+                                    </Button>
+                                </InputRightElement>
+                            </InputGroup>
+                            {password === '' ? (
+                                <FormErrorMessage>Password is required</FormErrorMessage>
+                            ) : (<> </>)}
                         </FormControl>
                         <Stack spacing={10}>
-                            <Stack
-                                direction={{base: 'column', sm: 'row'}}
-                                align={'start'}
-                                justify={'space-between'}>
-                                <Checkbox>Remember me</Checkbox>
-                                <Text color={'blue.400'}>Forget password?</Text>
-                            </Stack>
                             <Button
+                                onClick={() => logIn()}
                                 loadingText={'Logging in'}
                                 size={'lg'}
                                 bg={'blue.400'}
