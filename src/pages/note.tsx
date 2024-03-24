@@ -16,9 +16,11 @@ import {
     Textarea,
     useColorModeValue
 } from "@chakra-ui/react";
-import React from "react";
-import {DeleteIcon} from "@chakra-ui/icons";
+import React, {useEffect} from "react";
+import {DeleteIcon, RepeatIcon} from "@chakra-ui/icons";
 import {useNavigate} from "react-router-dom";
+import constants from "../constants/constants.ts";
+import axios from "axios";
 
 interface Note {
     modified_at: string,
@@ -29,38 +31,86 @@ interface Note {
 }
 
 const NotePage = () => {
-    const dummyNote: Note[] = [
-        {
-            modified_at: '29 February 2024',
-            id: '1',
-            title: 'Text Title 1',
-            content: 'This is the text content',
-            type: 'Study'
-        },
-        {
-            modified_at: '29 February 2024',
-            id: '2',
-            title: 'Text Title 2',
-            content: 'This is the text content',
-            type: 'Journal'
-        },
-        {
-            modified_at: '29 February 2024',
-            id: '3',
-            title: 'Text Title 3',
-            content: 'This is the text content',
-            type: 'Other'
-        }
-    ]
+    // const dummyNote: Note[] = [
+    //     {
+    //         modified_at: '29 February 2024',
+    //         id: '1',
+    //         title: 'Text Title 1',
+    //         content: 'This is the text content',
+    //         type: 'Study'
+    //     },
+    //     {
+    //         modified_at: '29 February 2024',
+    //         id: '2',
+    //         title: 'Text Title 2',
+    //         content: 'This is the text content',
+    //         type: 'Journal'
+    //     },
+    //     {
+    //         modified_at: '29 February 2024',
+    //         id: '3',
+    //         title: 'Text Title 3',
+    //         content: 'This is the text content',
+    //         type: 'Other'
+    //     }
+    // ]
+
+    const [notes, setNotes] = React.useState<Note[]>([])
 
     const navigate = useNavigate()
+
+    const baseURL = constants.BACKEND_URL
+
+    const createNote = async () => {
+        try {
+            const response = await axios.post(`${baseURL}/api/v1/note`, {
+                title: `New Note`,
+                content: 'Enter your note here',
+                type: 'Default'
+            }, {withCredentials: true})
+
+            if (response.status === 200) {
+                retrieveNotes()
+            }
+        } catch (err) {
+            console.log('Error: ', err)
+            throw err
+        }
+    }
+
+    const retrieveNotes = async () => {
+        try {
+            const response = await axios.get(`${baseURL}/api/v1/note?offset=1&size=100`, {withCredentials: true})
+
+
+            if (response.status === 200) {
+                const retrievedNotes = response.data.data.notes
+                for (let i = 0; i < retrievedNotes.length; i++) {
+                    retrievedNotes[i].modified_at = new Date(retrievedNotes[i].modified_at).toLocaleString('en-ID', {
+                        hour: 'numeric',
+                        minute: 'numeric',
+                        day: 'numeric',
+                        month: 'numeric',
+                        year: 'numeric',
+                        timeZone: 'Asia/Jakarta'
+                    })
+                }
+                setNotes(retrievedNotes)
+            }
+
+        } catch (err) {
+            setNotes([])
+        }
+    }
 
     React.useEffect(() => {
         const isLoggedIn = document.cookie.includes('SessionID')
         if (!isLoggedIn) {
             navigate('/login')
         }
-    })
+
+        retrieveNotes()
+    }, [])
 
     return (
         <Tabs
@@ -77,7 +127,26 @@ const NotePage = () => {
                 overflowY={'scroll'}
                 borderRight={'1px'}
                 borderRightColor={useColorModeValue('gray.400', 'gray.600')}>
-                {dummyNote.map((note) => (
+                <HStack
+                    px={4}
+                    py={2}
+                    justifyContent={'space-between'}
+                    borderBottom={'1px'}
+                    borderBottomColor={useColorModeValue('gray.200', 'gray.700')}>
+                    <Text
+                        fontSize={'lg'}
+                        flexShrink={0}
+                        justifyContent={'left'}>
+                        Notes
+                    </Text>
+                    <IconButton
+                        onClick={retrieveNotes}
+                        aria-label={'reload'}
+                        bgColor={'blue.300'}
+                        icon={<RepeatIcon/>}
+                        size={'sm'}/>
+                </HStack>
+                {notes.map((note) => (
                     <NoteSelect
                         key={note.id}
                         noteTitle={note.title}
@@ -85,14 +154,15 @@ const NotePage = () => {
                         noteType={note.type}
                     />
                 ))}
-                <Button rounded={0} flexShrink={0}>Add New Note</Button>
+                <Button rounded={0} flexShrink={0} onClick={async () => await createNote()}>Add New Note</Button>
             </TabList>
             {/*<NoteSelect/>*/}
             <TabPanels flex="75%">
-                {dummyNote.map((note) => (
+                {notes.map((note) => (
                     <NotePreview
                         key={note.id}
                         modifiedAt={note.modified_at}
+                        noteID={note.id}
                         noteTitle={note.title}
                         noteContent={note.content}
                         noteType={note.type}/>
@@ -137,19 +207,73 @@ const NoteSelect = ({noteTitle, noteContent, noteType}: NoteSelectProps) => {
 
 interface NotePreviewProps {
     modifiedAt: string,
+    noteID: string,
     noteTitle: string,
     noteContent: string,
     noteType: string
 }
 
-const NotePreview = ({modifiedAt, noteTitle, noteContent, noteType}: NotePreviewProps) => {
+const NotePreview = ({modifiedAt, noteID, noteTitle, noteContent, noteType}: NotePreviewProps) => {
     const [type, setType] = React.useState(noteType)
     const [title, setTitle] = React.useState(noteTitle)
     const [content, setContent] = React.useState(noteContent)
 
-    const handleTypeInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setType(e.target.value)
-    const handleTitleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setTitle(e.target.value)
-    const handleContentInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)
+    const [isChanged, setIsChanged] = React.useState(false)
+
+    const handleTypeInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setIsChanged(true)
+        setType(e.target.value)
+    }
+    const handleTitleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setIsChanged(true)
+        setTitle(e.target.value)
+    }
+    const handleContentInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setIsChanged(true)
+        setContent(e.target.value)
+    }
+
+    const baseURL = constants.BACKEND_URL
+
+    const updateNote = async () => {
+        try {
+            const response = await axios.patch(`${baseURL}/api/v1/note`, {
+                id: noteID,
+                title: title,
+                content: content,
+                type: type
+            }, {withCredentials: true})
+
+            if (response.status === 200) {
+                console.log('updated')
+            }
+
+            return response.data
+        } catch (err) {
+            console.log('Error: ', err)
+            throw err
+        }
+    }
+
+    const deleteNote = async () => {
+        try {
+            const response = await axios.delete(`${baseURL}/api/v1/note/${noteID}`, {withCredentials: true})
+
+            if (response.status === 200) {
+                console.log('deleted')
+            }
+        } catch (err) {
+            console.log('Error: ', err)
+            throw err
+        }
+    }
+
+    useEffect(() => {
+        if (isChanged) {
+            setIsChanged(false)
+            updateNote()
+        }
+    }, [isChanged, updateNote])
 
     return (
         <TabPanel height={'100%'}>
@@ -171,6 +295,7 @@ const NotePreview = ({modifiedAt, noteTitle, noteContent, noteType}: NotePreview
                         textColor={useColorModeValue('black', 'gray.100')}/>
                     <Box flex={1}>
                         <IconButton
+                            onClick={deleteNote}
                             bgColor={'blue.300'}
                             color={'white'}
                             aria-label={'delete-note'}
