@@ -31,30 +31,6 @@ interface Note {
 }
 
 const NotePage = () => {
-    // const dummyNote: Note[] = [
-    //     {
-    //         modified_at: '29 February 2024',
-    //         id: '1',
-    //         title: 'Text Title 1',
-    //         content: 'This is the text content',
-    //         type: 'Study'
-    //     },
-    //     {
-    //         modified_at: '29 February 2024',
-    //         id: '2',
-    //         title: 'Text Title 2',
-    //         content: 'This is the text content',
-    //         type: 'Journal'
-    //     },
-    //     {
-    //         modified_at: '29 February 2024',
-    //         id: '3',
-    //         title: 'Text Title 3',
-    //         content: 'This is the text content',
-    //         type: 'Other'
-    //     }
-    // ]
-
     const [notes, setNotes] = React.useState<Note[]>([])
 
     const navigate = useNavigate()
@@ -116,20 +92,47 @@ const NotePage = () => {
         <Tabs
             overflow={'auto'}
             rounded={'lg'}
-            orientation={'vertical'}
+            orientation={window.innerWidth < 992 ? 'horizontal' : 'vertical'}
             colorScheme={useColorModeValue('white', 'gray.900')}
             bg={useColorModeValue('white', 'gray.700')}
-            boxShadow={'lg'}>
+            boxShadow={'lg'} isLazy>
+            <HStack
+                px={4}
+                py={2}
+                display={{base: 'flex', lg: 'none'}}
+                justifyContent={'space-between'}
+                borderBottom={'1px'}
+                borderBottomColor={useColorModeValue('gray.200', 'gray.700')}>
+                <Text
+                    fontSize={'lg'}
+                    flexShrink={0}
+                    justifyContent={'left'}>
+                    Notes
+                </Text>
+                <Button
+                    display={{base: 'flex', lg: 'none'}}
+                    rounded={0}
+                    flexShrink={0}
+                    onClick={async () => await createNote()}>
+                    Add New Note
+                </Button>
+                <IconButton
+                    onClick={retrieveNotes}
+                    aria-label={'reload'}
+                    bgColor={'blue.300'}
+                    icon={<RepeatIcon/>}
+                    size={'sm'}/>
+            </HStack>
             <TabList
-                flex="25%"
-                minH={'90vh'}
-                maxH={'90vh'}
-                overflowY={'scroll'}
-                borderRight={'1px'}
-                borderRightColor={useColorModeValue('gray.400', 'gray.600')}>
+                flex={{base: '100%', lg: '25%'}}
+                minH={{base: '10vh', lg: '80vh'}}
+                maxH={{base: '10vh', lg: '100vh'}}
+                overflowX={{base: 'scroll', lg: 'clip'}}
+                overflowY={{base: 'clip', lg: 'scroll'}}>
                 <HStack
                     px={4}
                     py={2}
+                    display={{base: 'none', lg: 'flex'}}
                     justifyContent={'space-between'}
                     borderBottom={'1px'}
                     borderBottomColor={useColorModeValue('gray.200', 'gray.700')}>
@@ -154,10 +157,18 @@ const NotePage = () => {
                         noteType={note.type}
                     />
                 ))}
-                <Button rounded={0} flexShrink={0} onClick={async () => await createNote()}>Add New Note</Button>
+                <Button
+                    display={{base: 'none', lg: 'flex'}}
+                    rounded={0}
+                    flexShrink={0}
+                    onClick={async () => await createNote()}>
+                    Add New Note
+                </Button>
             </TabList>
-            {/*<NoteSelect/>*/}
-            <TabPanels flex="75%">
+            <TabPanels
+                flex={{base: '100%', lg: '75%'}}
+                borderLeft={{base: '0px', lg: '1px'}}
+                borderLeftColor={useColorModeValue('gray.400', 'gray.600')}>
                 {notes.map((note) => (
                     <NotePreview
                         key={note.id}
@@ -188,18 +199,28 @@ const NoteSelect = ({noteTitle, noteContent, noteType}: NoteSelectProps) => {
             borderBottom={'1px'}
             borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
             _selected={{
-                borderRight: '2px',
-                borderRightColor: 'blue.200'
+                border: '2px',
+                borderColor: 'blue.200'
             }}>
             <Stack width={'100%'}>
-                <HStack justifyContent={'space-between'}>
+                <Text display={{base: 'flex', lg: 'none'}} fontSize={'xl'} align={'left'}>{noteTitle}</Text>
+                <Badge display={{base: 'flex', lg: 'none'}} variant='outline' textColor={'blue.300'}
+                       borderColor={'blue.300'}>
+                    {noteType}
+                </Badge>
+                <HStack display={{base: 'none', lg: 'flex'}} justifyContent={'space-between'}>
                     <Text fontSize={'xl'} align={'left'}>{noteTitle}</Text>
                     <Badge variant='outline' textColor={'blue.300'} borderColor={'blue.300'}>
                         {noteType}
                     </Badge>
                 </HStack>
-                <Text fontSize={'md'} textColor={useColorModeValue('gray.500', 'gray.500')}
-                      align={'left'}>{noteContent}</Text>
+                <Text
+                    display={{base: 'none', lg: 'flex'}}
+                    fontSize={'md'}
+                    textColor={useColorModeValue('gray.500', 'gray.500')}
+                    align={'left'}>
+                    {noteContent}
+                </Text>
             </Stack>
         </Tab>
     )
@@ -342,8 +363,7 @@ const NotePreview = ({modifiedAt, noteID, noteTitle, noteContent, noteType}: Not
                         pt={0}
                         value={content}
                         onChange={handleContentInputChange}
-                        minH={'100%'}
-                        // maxH={'90vh'}
+                        minH={'80vh'}
                         overflowY={'scroll'}
                         placeholder={'Note Content'}
                         resize={'none'}

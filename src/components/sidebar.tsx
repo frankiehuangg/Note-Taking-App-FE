@@ -166,8 +166,9 @@ const MobileNav = ({onOpen, ...rest}: MobileProps) => {
                 icon={<FiMenu/>}
             />
 
-            <Text fontSize={'2xl'} ml={'8'} fontFamily={'monospace'} fontWeight={'bold'}>
-                Logo
+            <Icon boxSize={8} as={FcDocument}/>
+            <Text fontSize={'2xl'} fontFamily={'monospace'} fontWeight={'bold'}>
+                NTA
             </Text>
         </Flex>
     )
