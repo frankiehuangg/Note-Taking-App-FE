@@ -19,6 +19,7 @@ import {IconType} from 'react-icons'
 import {IoDocumentTextOutline} from 'react-icons/io5'
 import {Outlet} from 'react-router-dom'
 import {ReactNode} from 'react'
+import {FcDocument} from "react-icons/fc";
 
 interface LinkItemProps {
     name: string
@@ -32,7 +33,7 @@ const GuestLinkItems: Array<LinkItemProps> = [
     {name: 'Login', href: '/login', icon: FiLogIn}
 ]
 
-const UserLinkItems : Array<LinkItemProps> = [
+const UserLinkItems: Array<LinkItemProps> = [
     {name: 'Home', href: '/', icon: FiHome},
     {name: 'Note', href: '/note', icon: IoDocumentTextOutline},
     {name: 'Logout', href: '/logout', icon: FiLogOut}
@@ -78,9 +79,10 @@ const SidebarContent = ({onClose, ...rest}: SidebarProps) => {
             pos={'fixed'}
             h={'full'}
             {...rest}>
-            <Flex h={'20'} alignItems={'center'} mx={'8'} justifyContent={'space-between'}>
+            <Flex h={'20'} alignItems={'center'} mx={'8'} justifyContent={'start'}>
+                <Icon boxSize={8} as={FcDocument}/>
                 <Text fontSize={'2xl'} fontFamily={'monospace'} fontWeight={'bold'}>
-                    Logo
+                    NTA
                 </Text>
                 <CloseButton display={{base: 'flex', md: 'none'}} onClick={onClose}/>
             </Flex>
