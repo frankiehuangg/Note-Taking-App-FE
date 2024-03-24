@@ -1,22 +1,74 @@
 'use client'
 
-import {useState} from "react";
+import React from 'react'
 import {
-    Box, Button,
+    Box,
+    Button,
     Flex,
     FormControl,
+    FormErrorMessage,
     FormLabel,
     Heading,
     HStack,
-    Input, InputGroup, InputRightElement, Link,
+    Input,
+    InputGroup,
+    InputRightElement,
+    Link,
     Stack,
     Text,
     useColorModeValue
-} from "@chakra-ui/react";
-import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
+} from '@chakra-ui/react'
+import {ViewIcon, ViewOffIcon} from '@chakra-ui/icons'
+import axios from 'axios'
+import validator from 'validator'
+import {useNavigate} from 'react-router-dom'
+import constants from '../constants/constants.ts'
 
 const RegisterPage = () => {
-    const [showPassword, setShowPassword] = useState(false)
+    const [showPassword, setShowPassword] = React.useState(false)
+    const [hasTried, setHasTried] = React.useState(false)
+
+    const [firstName, setFirstName] = React.useState('')
+    const [lastName, setLastName] = React.useState('')
+    const [email, setEmail] = React.useState('')
+    const [password, setPassword] = React.useState('')
+
+    const navigate = useNavigate()
+
+    const register = async () => {
+        if (!hasTried) setHasTried(true)
+
+        if (firstName === '' || lastName === '' || email === '' || password === '') {
+            return
+        }
+
+        if (!validator.isEmail(email)) {
+            return
+        }
+        if (!validator.isStrongPassword(password)) {
+            return
+        }
+
+        const baseURL = constants.BACKEND_URL
+
+        try {
+            const response = await axios.post(`${baseURL}/api/v1/register`, {
+                'first_name': firstName,
+                'last_name': lastName,
+                'email': email,
+                'password': password
+            }, {withCredentials: true})
+
+            if (response.status === 200) {
+                navigate('/')
+            }
+
+            return response.data
+        } catch (err) {
+            console.log('Error: ', err)
+            throw err
+        }
+    }
 
     return (
         <Flex
@@ -41,36 +93,73 @@ const RegisterPage = () => {
                     <Stack spacing={4}>
                         <HStack>
                             <Box>
-                                <FormControl id={'firstname'} isRequired>
+                                <FormControl id={'firstname'} isInvalid={firstName === '' && hasTried}>
                                     <FormLabel>First Name</FormLabel>
-                                    <Input type={'text'} />
+                                    <Input
+                                        value={firstName}
+                                        type={'text'}
+                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}/>
+                                    {firstName === '' ? (
+                                        <FormErrorMessage>Your first name is required</FormErrorMessage>
+                                    ) : (<> </>)}
                                 </FormControl>
                             </Box>
                             <Box>
-                                <FormControl id={'lastname'} isRequired>
+                                <FormControl id={'lastname'} isInvalid={lastName === '' && hasTried}>
                                     <FormLabel>Last Name</FormLabel>
-                                    <Input type={'text'} />
+                                    <Input
+                                        value={lastName}
+                                        type={'text'}
+                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}/>
+                                    {lastName === '' ? (
+                                        <FormErrorMessage>Your last name is required</FormErrorMessage>
+                                    ) : (<> </>)}
                                 </FormControl>
                             </Box>
                         </HStack>
-                        <FormControl id={'email'} isRequired>
+                        <FormControl id={'email'} isInvalid={(email === '' || !validator.isEmail(email)) && hasTried}>
                             <FormLabel>Email address</FormLabel>
-                            <Input type={'email'} />
+                            <Input
+                                value={email}
+                                type={'email'}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}/>
+                            {email === '' ? (
+                                <FormErrorMessage>Email is required</FormErrorMessage>
+                            ) : (<></>)}
+                            {!validator.isEmail(email) ? (
+                                <FormErrorMessage>Invalid email</FormErrorMessage>
+                            ) : (<></>)
+                            }
                         </FormControl>
-                        <FormControl id={'password'} isRequired>
+                        <FormControl id={'password'}
+                                     isInvalid={(password === '' || !validator.isStrongPassword(password)) && hasTried}>
                             <FormLabel>Password</FormLabel>
                             <InputGroup>
-                                <Input type={showPassword ? 'text' : 'password'} />
+                                <Input
+                                    value={password}
+                                    type={showPassword ? 'text' : 'password'}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}/>
                                 <InputRightElement h={'full'}>
                                     <Button
                                         variant={'ghost'}
-                                        onClick={() => setShowPassword((showPassword) => !showPassword)} />
-                                    {showPassword ? <ViewIcon /> : <ViewOffIcon /> }
+                                        onClick={() => setShowPassword((showPassword) => !showPassword)}>
+                                        {showPassword ? <ViewIcon/> : <ViewOffIcon/>}
+                                    </Button>
                                 </InputRightElement>
                             </InputGroup>
+                            {password === '' ? (
+                                <FormErrorMessage>Password is required</FormErrorMessage>
+                            ) : (<></>)}
+                            {!validator.isStrongPassword(password) ? (
+                                <FormErrorMessage>
+                                    Invalid password, must contains a lowercase, uppercase, number, and symbols each
+                                    with minimum length of 8
+                                </FormErrorMessage>
+                            ) : (<></>)}
                         </FormControl>
                         <Stack spacing={10} pt={2}>
                             <Button
+                                onClick={() => register()}
                                 loadingText={'Submitting'}
                                 size={'lg'}
                                 bg={'blue.400'}
